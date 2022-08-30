@@ -17,7 +17,7 @@ if [ -z $BRANCH ]; then
 fi
 
 echo "Working in: $APP_PATH"
-cd $APP_PATH
+cd $APP_PATH || exit
 
 # Local:
 _check_branch=$(git branch --list "${BRANCH}")
@@ -45,15 +45,19 @@ fi
 git submodule sync
 git submodule init
 git submodule update
-#git submodule foreach "(git checkout $BRANCH && git pull --ff origin $BRANCH && git push origin $BRANCH) || true"
 git submodule foreach "[ -z $(git ls-remote --heads origin "${BRANCH}") ] && git checkout -b $BRANCH && git push origin $BRANCH || git checkout $BRANCH && git pull --ff origin $BRANCH && git push origin $BRANCH"
-git submodule foreach "([ -z $(git ls-remote --heads origin test-automation) ] && git checkout -b test-automation && git push origin test-automation || git checkout test-automation && git pull --ff origin test-automation && git push origin test-automation)"
 
 for i in $(git submodule foreach --quiet 'echo $path')
 do
   echo "Adding $i to root repo"
   git add "$i"
+  cd $i || exit
+  git add .
+  git commit -m ":hammer: adding change"
+  git push
+  cd ..
 done
 
-git commit -m "Updated $BRANCH branch of deployment repo to point to latest head of submodules"
+git add .
+git commit -m ":package: Updated $BRANCH branch of deployment repo to point to latest head of submodules"
 git push origin $BRANCH
