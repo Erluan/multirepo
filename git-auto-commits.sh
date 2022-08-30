@@ -54,7 +54,7 @@ do
   cd $i || exit
   git add .
   git commit -m ":hammer: adding change"
-  git push
+  git push --set-upstream origin "$BRANCH"
   cd ..
 done
 
