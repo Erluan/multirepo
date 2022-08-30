@@ -1,0 +1,3 @@
+[submodule "subrepo_one"]
+	path = subrepo_one
+	url = git@github.com:Erluan/subrepo_one.git
