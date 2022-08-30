@@ -12,6 +12,6 @@ git submodule add "$REPO_PATH"
 git submodule init
 
 # Now the submodules are in the state you want, so
-git commit -am "Adding new SubRepo"
+git commit -am ":package: adding new SubRepo"
 
 git push

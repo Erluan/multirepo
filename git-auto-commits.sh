@@ -19,12 +19,35 @@ fi
 echo "Working in: $APP_PATH"
 cd $APP_PATH
 
-git checkout $BRANCH && git pull --ff origin $BRANCH
+# Local:
+_check_branch=$(git branch --list "${BRANCH}")
+# do check Condition_Vars_Must_Be_Not_Empty
+if [[ -z ${_check_branch} ]]; then
+    echo "local: branch does not exist"
+    git checkout -b $BRANCH && git pull --ff origin $BRANCH
+else
+    echo "local: Good lets continue"
+    git checkout $BRANCH
+fi
+
+# Remote:
+_check_branch=$(git ls-remote --heads origin "${BRANCH}")
+# do check Condition_Vars_Must_Be_Not_Empty
+if [[ -z ${_check_branch} ]]; then
+    echo "remote: branch does not exist"
+else
+    echo "remote: Good lets continue"
+    git checkout $BRANCH
+fi
+
+[ -z "$(git ls-remote --heads origin "${BRANCH}")" ] && echo "NULL" || echo "Not NULL"
 
 git submodule sync
 git submodule init
 git submodule update
-git submodule foreach "(git checkout $BRANCH && git pull --ff origin $BRANCH && git push origin $BRANCH) || true"
+#git submodule foreach "(git checkout $BRANCH && git pull --ff origin $BRANCH && git push origin $BRANCH) || true"
+git submodule foreach "[ -z $(git ls-remote --heads origin "${BRANCH}") ] && git checkout -b $BRANCH && git push origin $BRANCH || git checkout $BRANCH && git pull --ff origin $BRANCH && git push origin $BRANCH"
+git submodule foreach "([ -z $(git ls-remote --heads origin test-automation) ] && git checkout -b test-automation && git push origin test-automation || git checkout test-automation && git pull --ff origin test-automation && git push origin test-automation)"
 
 for i in $(git submodule foreach --quiet 'echo $path')
 do
